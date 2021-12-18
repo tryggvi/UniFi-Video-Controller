@@ -1,0 +1,12 @@
+--- /usr/sbin/unifi-video.orig2	2021-12-18 17:03:38.193418299 +0000
++++ /usr/sbin/unifi-video	2021-12-18 17:05:43.332380251 +0000
+@@ -252,6 +252,8 @@
+ 
+ [ -e /dev/urandom ] && \
+         JVM_EXTRA_OPTS="-Djava.security.egd=file:/dev/./urandom ${JVM_EXTRA_OPTS}"
++# 2021-12-18 tryggvi@linux.is: CVE-2021-44228 (Log4j) mitigation
++JVM_EXTRA_OPTS="-Dlog4j2.formatMsgNoLookups=true ${JVM_EXTRA_OPTS}"
+ 
+ JVM_OPTS="${JVM_EXTRA_OPTS} \
+  -Xmx${JVM_MX} \
+

@@ -1,5 +1,9 @@
 FROM phusion/baseimage:0.11
-MAINTAINER pducharme@me.com
+MAINTAINER tryggvi@linux.is
+
+LABEL com.example.version="3.10.13tf"
+LABEL vendor1="Tryggvi Farestveit"
+LABEL com.example.release-date="2021-12-18"
 
 # Version
 ENV version 3.10.13
@@ -14,6 +18,7 @@ ENV PUID="99" PGID="100" UMASK="002"
 
 # Add needed patches and scripts
 ADD unifi-video.patch /unifi-video.patch
+ADD unifi-video-log4j.patch /unifi-video-log4j.patch
 ADD run.sh /run.sh
 
 # Add mongodb repo, key, update and install needed packages
@@ -25,6 +30,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75
   apt-get install -y  \
     jsvc \
     jq \
+    zip \
     moreutils \
     openjdk-8-jre-headless=8u162-b12-1 \
     patch \
@@ -40,9 +46,13 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75
 RUN wget -q -O unifi-video.deb https://dl.ubnt.com/firmwares/ufv/v${version}/unifi-video.Ubuntu18.04_amd64.v${version}.deb && \
   dpkg -i unifi-video.deb && \
   patch -lN /usr/sbin/unifi-video /unifi-video.patch && \
+  patch -lN /usr/sbin/unifi-video /unifi-video-log4j.patch && \
   rm /unifi-video.deb && \
   rm /unifi-video.patch && \
-  chmod 755 /run.sh
+  rm /unifi-video-log4j.patch && \
+  chmod 755 /run.sh && \
+  cd /usr/lib/unifi-video/lib &&\
+  zip -q -d log4j-core-*.jar org/apache/logging/log4j/core/lookup/JndiLookup.class \
 
 # RTMP, RTMPS & RTSP, Inbound Camera Streams & Camera Management (NVR Side), UVC-Micro Talkback (Camera Side)
 # HTTP & HTTPS Web UI + API, Video over HTTP & HTTPS
